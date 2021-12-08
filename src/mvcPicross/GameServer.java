@@ -16,6 +16,9 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -34,7 +37,7 @@ public class GameServer extends JFrame implements Runnable  {
 	static int nclient = 0, nclients = 0;
 	static Thread thread;
 	static ServerSocket servsock;
-	
+	List<Player> playerList;
 	private String valStr="";
 	JPanel panel1, panel2, panel3;
 	JLabel serverLabel;
@@ -108,6 +111,7 @@ public class GameServer extends JFrame implements Runnable  {
 		this.setTitle("Ajithyugan Jeyakumar's A3 GameServer");
 		this.execute.addActionListener(new serverController());
 		this.finalize.addActionListener(new serverController());
+		playerList=new ArrayList<>();
 					
 	}
 	
@@ -139,16 +143,10 @@ public class GameServer extends JFrame implements Runnable  {
 				System.out.println(e);
 			}
 			while(true){
-//				if(isFinalize) {
-//					try {
-//						servsock.close();
-//						break;
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-					System.out.println(isFinalize);
+				if(isFinalize) {
+					break;
+				}
+					
 					try {
 						sock = servsock.accept();
 						nclient += 1;
@@ -172,16 +170,27 @@ public class GameServer extends JFrame implements Runnable  {
 		Socket sockNew;
 		int clientid, markPosition,lastMarkPosition;
 		String strcliid;
-
+		Player player;
 		public Worked(Socket s, int nclient) {
 			sockNew = s;
 			clientid = nclient;
+			player=new Player();
+		}
+		
+		public static boolean isNumeric(String str) { 
+			  try {  
+			    Integer.parseInt(str);  
+			    return true;
+			  } catch(NumberFormatException e){  
+			    return false;  
+			  }  
 		}
 
 		public void run() {
 			String clientData;
 			String originalData;
 			PrintWriter out = null;
+			
 			try {
 				out = new PrintWriter(sockNew.getOutputStream(),true);
 				BufferedReader br1 = new BufferedReader(new InputStreamReader(sockNew.getInputStream()));
@@ -190,6 +199,16 @@ public class GameServer extends JFrame implements Runnable  {
 				originalData=clientData;
 
 				System.out.println("clientData : "+clientData);
+				StringTokenizer	st = new StringTokenizer(clientData, ",");
+				while (st.hasMoreTokens()) {
+					String str=st.nextToken();
+					if(isNumeric(str)) {
+						player.setId(str);
+					}else {
+						player.setName(str);
+					}
+					System.out.println();
+				}
 				while (clientData ==null || !clientData.equals(END)) {
 
 					clientData = br1.readLine();

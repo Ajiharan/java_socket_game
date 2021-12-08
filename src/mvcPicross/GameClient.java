@@ -141,19 +141,19 @@ public class GameClient extends JFrame implements Runnable {
 	
 	public void connectClient() {
 		
-//		String userName=userField.getText();
-//		String localHost=serverField.getText();
-//		int port=Integer.parseInt(cPortField.getText());
+		String userName=userField.getText();
+		String localHost=serverField.getText();
+		int port=Integer.parseInt(cPortField.getText());
 		
 
 		try {
 			 
             // Creating Socket class object and
             // initializing Socket
-//             soc = new Socket(localHost,port);
-             soc = new Socket("localhost",111);
-//             clientTextArea.setText("Creating New MVC Game "+"\n"+"Connection button"+ "\n"+"startClient...."+"\n"+"Connection with "+localHost+"on port "+port);
-             clientTextArea.setText("Creating New MVC Game "+"\n"+"Connection button"+ "\n"+"startClient...."+"\n"+"Connection with "+"localhost"+"on port "+"111");
+             soc = new Socket(localHost,port);
+//             soc = new Socket("localhost",111);
+             clientTextArea.setText("Creating New MVC Game "+"\n"+"Connection button"+ "\n"+"startClient...."+"\n"+"Connection with "+localHost+"on port "+port);
+//             clientTextArea.setText("Creating New MVC Game "+"\n"+"Connection button"+ "\n"+"startClient...."+"\n"+"Connection with "+"localhost"+"on port "+"111");
              in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
              
               clientId = in.readLine();
@@ -161,7 +161,7 @@ public class GameClient extends JFrame implements Runnable {
              d=new PrintWriter(soc.getOutputStream(), true);
  
             // Message to be displayed
-            d.println("Hello client");
+            d.println(clientId+","+userName);
  
             // Flushing out internal buffers,
             // optimizing for better performance
@@ -178,6 +178,7 @@ public class GameClient extends JFrame implements Runnable {
  
             // Print the exception on the console
             System.out.println(e);
+            JOptionPane.showMessageDialog(null, e.getMessage(),"Unable to Connect",JOptionPane.ERROR_MESSAGE);
         }
 	}
 	public static void main(String arg[]) /* throws IOException */{
@@ -263,7 +264,7 @@ public class GameClient extends JFrame implements Runnable {
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				JOptionPane.showMessageDialog(null, e.getMessage());
+				JOptionPane.showMessageDialog(null, e.getMessage(),"Unable to Connect",JOptionPane.ERROR_MESSAGE);
 			}
 			
 		}
