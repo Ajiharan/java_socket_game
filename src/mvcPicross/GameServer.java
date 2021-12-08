@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -111,6 +112,7 @@ public class GameServer extends JFrame implements Runnable  {
 		this.setTitle("Ajithyugan Jeyakumar's A3 GameServer");
 		this.execute.addActionListener(new serverController());
 		this.finalize.addActionListener(new serverController());
+		this.results.addActionListener(new serverController());
 		playerList=new ArrayList<>();
 					
 	}
@@ -245,6 +247,23 @@ public class GameServer extends JFrame implements Runnable  {
 							out.println(clientid+"#"+valStr);
 							out.flush();
 							
+						}else {
+							if(clientData.contains("P3")) {
+								if(playerList.contains(player)) {
+									playerList.remove(player);
+								}
+								
+								
+								String timer=originalData.substring(originalData.lastIndexOf("#")+1,originalData.length());
+								String points=clientData.substring(clientData.lastIndexOf("#")+1,clientData.length());
+								
+								player.setTime(timer);
+								player.setPoints(points);
+								
+							
+								playerList.add(player);
+								
+							}
 						}
 
 					}
@@ -268,6 +287,14 @@ public class GameServer extends JFrame implements Runnable  {
 			}
 		}
 	}
+	
+	public void showResults() {
+		String result="";
+		for (Player player : playerList) {
+			result+=player.toString()+"\n";
+		}
+		JOptionPane.showMessageDialog(null, result,"Message",JOptionPane.INFORMATION_MESSAGE);
+	}
 	class serverController implements ActionListener {
 
 		@Override
@@ -281,6 +308,8 @@ public class GameServer extends JFrame implements Runnable  {
 				isFinalize=!isFinalize;
 				System.out.println("finalized : "+isFinalize);
 				
+			}else if(eventObject==results) {
+				showResults();
 			}
 		}
 

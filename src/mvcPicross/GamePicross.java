@@ -15,7 +15,7 @@ import javax.swing.JWindow;
 public class GamePicross extends JWindow {
 	 private static final long serialVersionUID = 6248477390124803341L;
 	  private final int duration;
-
+	  private GameController controller;
 	  public GamePicross(int duration) {
 		    this.duration = duration;
 	 }
@@ -55,7 +55,7 @@ public class GamePicross extends JWindow {
 		  }
 	  
 	  
-	  public static void startGame() {
+	  public  void startGame() {
 		  int duration = 4000;
 		   
 		    	try{
@@ -73,12 +73,16 @@ public class GamePicross extends JWindow {
 			exc();
 	  }
 	public static void main(String[] args) {
-		startGame();
+//		startGame();
 	}
-	public static void exc() {
+	  
+	  public GameController getGameController() {
+		  return this.controller;
+	  }
+	public  void exc() {
 		GameModel gameModel = new GameModel();
 		GameView gameView = new GameView();
-		GameController controller = new GameController(gameView, gameModel);
+		controller = new GameController(gameView, gameModel);
 		((GameController) controller).start();
 	}
 

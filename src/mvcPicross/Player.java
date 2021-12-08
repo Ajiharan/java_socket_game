@@ -5,7 +5,7 @@ public class Player {
 	private String name;
 	private String id;
 	private String points;
-	private int time;
+	private String time;
 	
 	public Player() {}
 	
@@ -40,12 +40,17 @@ public class Player {
 		this.points = points;
 	}
 
-	public int getTime() {
+	public String getTime() {
 		return time;
 	}
 
-	public void setTime(int time) {
+	public void setTime(String time) {
 		this.time = time;
+	}
+
+	@Override
+	public String toString() {
+		return "Player [" + id + "]," + name + ", points=" + points + ", time=" + time;
 	}
 
 	

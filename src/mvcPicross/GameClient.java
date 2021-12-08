@@ -26,6 +26,8 @@ public class GameClient extends JFrame implements Runnable {
 
 	static final String END = "end";
 	static Thread thread;
+	GamePicross picross;
+	GameController gameController;
 	JLabel clientLabel;
 	JPanel clientPanelOne;
 	JPanel clientPanelTwo;
@@ -41,6 +43,7 @@ public class GameClient extends JFrame implements Runnable {
 	Socket soc;
 	BufferedReader in;
 	String clientId;
+	String userName="";
 	String valStr="";
 	PrintWriter d;
 	JButton clientNewGame = new JButton("New Game");
@@ -141,7 +144,7 @@ public class GameClient extends JFrame implements Runnable {
 	
 	public void connectClient() {
 		
-		String userName=userField.getText();
+		 userName=userField.getText();
 		String localHost=serverField.getText();
 		int port=Integer.parseInt(cPortField.getText());
 		
@@ -273,7 +276,26 @@ public class GameClient extends JFrame implements Runnable {
 	
 
 	public void startGame() {
-		GamePicross.startGame();
+		picross=new GamePicross(2000);
+		picross.startGame();
+		new Thread(new PlayerListener()).start();
+	}
+	
+	class PlayerListener implements Runnable{
+
+		@Override
+		public void run() {
+			while(true) {
+				gameController=picross.getGameController();
+				int points=gameController.getGameView().myTotalPoints;
+				int time=gameController.getGameView().i;
+				
+				 d.println(clientId+"#"+"P3"+"#"+userName+"#"+points+"#"+time);
+		         d.flush();
+			}
+			
+		}
+		
 	}
 	class clientController implements ActionListener {
 

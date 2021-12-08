@@ -38,6 +38,15 @@ public class GameController {
 		this.gameModel = gameModel;
 
 	}
+	
+	public GameView getGameView() {
+		return this.gameView;
+	}
+	
+	public GameModel getGameModel() {
+		return this.gameModel;
+	}
+	
 	public void start() {
 		gameModel.defaultGame();
 		gameView.setColumLabel(gameModel.DIMENSION, gameModel);
