@@ -53,22 +53,27 @@ public class GamePicross extends JWindow {
 
 		    dispose(); 
 		  }
+	  
+	  
+	  public static void startGame() {
+		  int duration = 4000;
+		   
+		    	try{
+		    	 duration = 2000;
+		    	}catch (NumberFormatException nfe){
+		    	  System.out.println("Wrong command line argument: must be an integer number");
+		    	  System.out.println("The default duration 10000 milliseconds will be used");
+		    	  nfe.printStackTrace();	
+		    	} 
+		    
+		    
+		    GamePicross splashWindow = new GamePicross(duration);
+		 splashWindow.showSplashWindow();
+			// TODO Auto-generated method stub
+			exc();
+	  }
 	public static void main(String[] args) {
-	    int duration = 4000;
-	    if(args.length == 1){
-	    	try{
-	    	 duration = Integer.parseInt(args[0]);
-	    	}catch (NumberFormatException nfe){
-	    	  System.out.println("Wrong command line argument: must be an integer number");
-	    	  System.out.println("The default duration 10000 milliseconds will be used");
-	    	  nfe.printStackTrace();	
-	    	} 
-	    }
-	    
-	    GamePicross splashWindow = new GamePicross(duration);
-	 splashWindow.showSplashWindow();
-		// TODO Auto-generated method stub
-		exc();
+		startGame();
 	}
 	public static void exc() {
 		GameModel gameModel = new GameModel();

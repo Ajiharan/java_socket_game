@@ -34,6 +34,8 @@ public class GameServer extends JFrame implements Runnable  {
 	static int nclient = 0, nclients = 0;
 	static Thread thread;
 	static ServerSocket servsock;
+	
+	private String valStr="";
 	JPanel panel1, panel2, panel3;
 	JLabel serverLabel;
 	JTextArea serverTextArea = new JTextArea();
@@ -51,6 +53,7 @@ public class GameServer extends JFrame implements Runnable  {
 	JButton results;
 	JCheckBox finalize;
 	JButton end;
+	private boolean isFinalize=false;
 
 	GameServer() {
 		port = new JLabel("Port:");
@@ -104,6 +107,7 @@ public class GameServer extends JFrame implements Runnable  {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setTitle("Ajithyugan Jeyakumar's A3 GameServer");
 		this.execute.addActionListener(new serverController());
+		this.finalize.addActionListener(new serverController());
 					
 	}
 	
@@ -135,28 +139,38 @@ public class GameServer extends JFrame implements Runnable  {
 				System.out.println(e);
 			}
 			while(true){
-				try {
-					sock = servsock.accept();
-					nclient += 1;
-					nclients += 1;
-					System.out.println("Connecting " + sock.getInetAddress() + " in port " + sock.getPort() + ".");
-					System.out.println("servsock"+servsock.getLocalPort());
-					this.serverTextArea.setText(this.serverTextArea.getText()+"\n"+"Current number of clients: " + nclients);
-				} catch (IOException ioe) {
-					System.out.println(ioe);
-				}
-				Worked w = new Worked(sock, nclient);
-				w.start();
+//				if(isFinalize) {
+//					try {
+//						servsock.close();
+//						break;
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+					System.out.println(isFinalize);
+					try {
+						sock = servsock.accept();
+						nclient += 1;
+						nclients += 1;
+						System.out.println("Connecting " + sock.getInetAddress() + " in port " + sock.getPort() + ".");
+						System.out.println("servsock"+servsock.getLocalPort());
+						this.serverTextArea.setText(this.serverTextArea.getText()+"\n"+"Current number of clients: " + nclients);
+					} catch (IOException ioe) {
+						System.out.println(ioe);
+					}
+					Worked w = new Worked(sock, nclient);
+					w.start();
+				
+				
 			}
 		
 	}
 	
 	
-	
-
 	class Worked extends Thread {
 		Socket sockNew;
-		int clientid, markPosition;
+		int clientid, markPosition,lastMarkPosition;
 		String strcliid;
 
 		public Worked(Socket s, int nclient) {
@@ -166,29 +180,61 @@ public class GameServer extends JFrame implements Runnable  {
 
 		public void run() {
 			String clientData;
+			String originalData;
 			PrintWriter out = null;
 			try {
-				out = new PrintWriter(sockNew.getOutputStream());
+				out = new PrintWriter(sockNew.getOutputStream(),true);
 				BufferedReader br1 = new BufferedReader(new InputStreamReader(sockNew.getInputStream()));
 				out.println(clientid);
 				clientData = br1.readLine();
-//				markPosition = clientData.indexOf("#");
-//				System.out.println(clientData);
-//				strcliid = clientData.substring(0, markPosition);
-//				clientData = clientData.substring(markPosition + 1, clientData.length());
-				
+				originalData=clientData;
+
+				System.out.println("clientData : "+clientData);
 				while (clientData ==null || !clientData.equals(END)) {
-//					System.out.println("Cli[" + strcliid + "]: " + clientData);
-					out.println("String '" + clientData + "' received.");
-					out.flush();
+
 					clientData = br1.readLine();
-//					markPosition = clientData.indexOf("#");
-//					strcliid = clientData.substring(0, markPosition);
-//					clientData = clientData.substring(markPosition + 1, clientData.length());
+
+					originalData=clientData;
+					if(clientData !=null) {
+						
+						markPosition = clientData.indexOf("#");
+						lastMarkPosition=clientData.lastIndexOf("#");
+						
+						if(markPosition==lastMarkPosition) {
+							strcliid = clientData.substring(0, markPosition);
+							clientData = clientData.substring(markPosition + 1, clientData.length());
+						}else {
+							strcliid = clientData.substring(0, markPosition);
+							clientData = clientData.substring(markPosition + 1, lastMarkPosition);
+						}
+//						System.out.println("markPosition : "+markPosition+" : "+lastMarkPosition);
+//						System.out.println("clientData : "+clientData);
+						if(clientData.equals("PO")) {
+							System.out.println("clientData P0: "+clientData);
+							sockNew.close();
+							break;
+						}
+						if(clientData.equals("P1")) {
+							System.out.println("clientData P1: "+clientData);
+							
+							valStr=originalData.substring(lastMarkPosition+1,originalData.length());
+							serverTextArea.setText(serverTextArea.getText()+"\n"+"cli"+"["+strcliid+"] "+valStr);
+						}
+						else if(clientData.equals("P2")) {
+							System.out.println("clientData P1: "+clientData);
+							serverTextArea.setText(serverTextArea.getText()+"\n"+"cli"+"["+strcliid+"] "+clientData);
+							out.println(clientid+"#"+valStr);
+							out.flush();
+							
+						}
+
+					}
+
 				}
 				System.out.println("Disconnecting " + sockNew.getInetAddress() + "!");
 				nclients -= 1;
 				System.out.println("Current number of clients: " + nclients);
+				serverTextArea.setText(serverTextArea.getText()+"\n"+"Current number of clients: " + nclients);
 				if (nclients == 0) {
 					System.out.println("Ending server...");
 					sockNew.close();
@@ -212,6 +258,10 @@ public class GameServer extends JFrame implements Runnable  {
 			
 			if(eventObject==execute) {
 				thread.start();
+			}else if(eventObject==finalize) {
+				isFinalize=!isFinalize;
+				System.out.println("finalized : "+isFinalize);
+				
 			}
 		}
 

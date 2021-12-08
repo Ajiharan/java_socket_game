@@ -39,7 +39,7 @@ public class GameModel {
 				}
 							
 			}
-			System.out.println(newStr);
+//			System.out.println(newStr);
 			this.valStr=newStr;
 			
 		}
@@ -51,6 +51,15 @@ public class GameModel {
 	}
 	
 	
+
+	public int[][] getBoard() {
+		return board;
+	}
+	
+	public String getvalStr() {
+		return valStr;
+	}
+
 
 	public void defaultGame() {
 

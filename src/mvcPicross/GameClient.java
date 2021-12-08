@@ -5,6 +5,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -21,9 +22,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 
-public class GameClient extends JFrame {
+public class GameClient extends JFrame implements Runnable {
 
 	static final String END = "end";
+	static Thread thread;
 	JLabel clientLabel;
 	JPanel clientPanelOne;
 	JPanel clientPanelTwo;
@@ -36,9 +38,11 @@ public class GameClient extends JFrame {
 	JTextField userField = new JTextField();
 	JTextField serverField = new JTextField();
 	JTextField cPortField = new JTextField();
-
-
-
+	Socket soc;
+	BufferedReader in;
+	String clientId;
+	String valStr="";
+	PrintWriter d;
 	JButton clientNewGame = new JButton("New Game");
 	JButton sendGame = new JButton("Send Game");
 	JButton receiveGame = new JButton("Receive Game");
@@ -123,35 +127,50 @@ public class GameClient extends JFrame {
 		this.setSize(600, 400);
 		this.setVisible(true);
 		this.setResizable(false);
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setTitle("Ajithyugan Jeyakumar's A3 GameClient");
 
+		
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		connectClient();
 	}
 	
 	public void connectClient() {
+		
+//		String userName=userField.getText();
+//		String localHost=serverField.getText();
+//		int port=Integer.parseInt(cPortField.getText());
+		
+
 		try {
 			 
             // Creating Socket class object and
             // initializing Socket
-            Socket soc = new Socket("localhost", 6666);
- 
-            DataOutputStream d = new DataOutputStream(
-                soc.getOutputStream());
+//             soc = new Socket(localHost,port);
+             soc = new Socket("localhost",111);
+//             clientTextArea.setText("Creating New MVC Game "+"\n"+"Connection button"+ "\n"+"startClient...."+"\n"+"Connection with "+localHost+"on port "+port);
+             clientTextArea.setText("Creating New MVC Game "+"\n"+"Connection button"+ "\n"+"startClient...."+"\n"+"Connection with "+"localhost"+"on port "+"111");
+             in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
+             
+              clientId = in.readLine();
+             System.out.println("clientId : "+clientId);
+             d=new PrintWriter(soc.getOutputStream(), true);
  
             // Message to be displayed
-            d.writeUTF("Hello client");
+            d.println("Hello client");
  
             // Flushing out internal buffers,
             // optimizing for better performance
             d.flush();
- 
-            // Closing the connections
- 
-            // Closing DataOutputStream
-            d.close();
-            // Closing socket
-            soc.close();
+            
+            
+            new Thread(new ServerLogs()).start();
+           
+
         }
  
         // Catch block to handle exceptions
@@ -163,7 +182,7 @@ public class GameClient extends JFrame {
 	}
 	public static void main(String arg[]) /* throws IOException */{
 
-		new GameClient();
+		thread=new Thread(new GameClient());
 
 
 		/*
@@ -187,9 +206,74 @@ public class GameClient extends JFrame {
 
 		// I have to put all listener here 
 
+	public void endConnection() {
+		 
+		try {
+			
+			  d.println(clientId+"#"+"PO");
+				 
+	  
+	            d.flush();
+	            d.close();
+	            soc.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	 
+	          
+	          
+	}
+	
+	public void updateBoard() {
+		GameModel gameModel=new GameModel();
+		gameModel.NewGame();
+		valStr=gameModel.getvalStr();
+		System.out.println(valStr);
+		 d.println(clientId+"#"+"P1#"+valStr);	  
+         d.flush();
 		
+	}
+	
+	public void getServerConfig() {
+		 d.println(clientId+"#"+"P2");	  
+         d.flush();
+		
+	}
+	
+	class ServerLogs implements Runnable{
+
+		@Override
+		public void run() {
+			try {
+				
+				while(true) {
+					String data=in.readLine();
+					if(data !=null) {
+						System.out.println("data : "+data);
+						int lastMarkPosition=data.lastIndexOf("#");
+						if(lastMarkPosition !=-1) {
+							String gameConfig=data.substring(lastMarkPosition+1,data.length());
+							System.out.println("gameConfig : "+gameConfig);
+							 clientTextArea.setText(clientTextArea.getText()+"\n"+"server response "+gameConfig);
+						}
+						
+						
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				JOptionPane.showMessageDialog(null, e.getMessage());
+			}
+			
+		}
+		
+	}
 	
 
+	public void startGame() {
+		GamePicross.startGame();
+	}
 	class clientController implements ActionListener {
 
 		@Override
@@ -198,11 +282,23 @@ public class GameClient extends JFrame {
 			Object eventObject = e.getSource();
 			if (eventObject== cEnd)
 			{
-				System.out.print("\n AJITH");
+				endConnection();
 				System.exit(0);
 
 			} 
+			else if (eventObject==connect) {
+				thread.start();
+			}else if(eventObject==sendGame) {
+				updateBoard();
+			}else if(eventObject==receiveGame) {
+				getServerConfig();
+			}else if(eventObject==play) {
+				startGame();
+			}
 		}
 
 	}
+
+
+		
 }
